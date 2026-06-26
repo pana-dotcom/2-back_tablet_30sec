@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>2-back Task</title>
+
 <style>
 body {
     font-family: Arial;
@@ -10,15 +11,23 @@ body {
     margin-top: 50px;
 }
 
-/* 中央固定 */
+/* ✅ 表示位置を完全固定 */
 #letter {
     font-size: 80px;
     height: 120px;
+    width: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 30px;
+    margin: 30px auto;
     line-height: 1;
+}
+
+/* ✅ ×専用スタイル */
+.fixation {
+    color: white;
+    background: gray;
+    border-radius: 10px;
 }
 
 button {
@@ -46,9 +55,10 @@ let index = 0;
 let logs = [];
 let responded = false;
 
-let baseLetters = ["B","F","K","H","M","Q","R","X"];
+let baseLetters = ["B","F","K","H","M","Q","R","T"];
 
-let timeLimit = 30; // ✅ 内部でのみ使用（5分）
+// ✅ 4分30秒
+let timeLimit = 30;
 let timeLeft = timeLimit;
 let gameTimer;
 
@@ -59,12 +69,24 @@ let fixationDuration = 2000;
 
 const startBtn = document.getElementById("startBtn");
 const game = document.getElementById("game");
+const letterDiv = document.getElementById("letter");
 
 startBtn.addEventListener("click", () => {
     startBtn.style.display = "none";
     game.style.display = "block";
     startGame();
 });
+
+// ✅ 表示制御（ここが重要）
+function showFixation() {
+    letterDiv.innerText = "✖";
+    letterDiv.classList.add("fixation");
+}
+
+function showStimulus(letter) {
+    letterDiv.innerText = letter;
+    letterDiv.classList.remove("fixation");
+}
 
 function startGame() {
     isRunning = true;
@@ -75,11 +97,10 @@ function startGame() {
 
     timeLeft = timeLimit;
 
-    // ✅ 見えないカウントダウン
+    // ✅ 強制終了タイマー
     gameTimer = setInterval(countDown, 1000);
 
-    // ✅ ×から開始
-    document.getElementById("letter").innerText = "✖";
+    showFixation();
 
     setTimeout(() => {
         if (!isRunning) return;
@@ -105,7 +126,7 @@ function nextTrial() {
 
     sequence.push(letter);
 
-    document.getElementById("letter").innerText = letter;
+    showStimulus(letter);
     index++;
 
     setTimeout(() => {
@@ -116,7 +137,7 @@ function nextTrial() {
             evaluate(false);
         }
 
-        document.getElementById("letter").innerText = "✖";
+        showFixation();
 
         setTimeout(() => {
             if (!isRunning) return;
@@ -156,10 +177,13 @@ function evaluate(clicked) {
 }
 
 function endGame() {
+    if (!isRunning) return;
+
     isRunning = false;
     clearInterval(gameTimer);
 
-    document.getElementById("letter").innerText = "終了";
+    letterDiv.innerText = "終了";
+    letterDiv.classList.remove("fixation");
 
     exportCSV();
 }
